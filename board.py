@@ -25,7 +25,7 @@ RIGHT = 3
 
 # This sets the maze dimensions
 # Number of rows and columns has to be odd
-COLUMNS = 81
+COLUMNS = 143
 ROWS = 81
 
 # This sets the margin between each cell
@@ -41,13 +41,17 @@ WINDOW_SIZE = [(WIDTH+MARGIN)*COLUMNS, (HEIGHT+MARGIN)*ROWS]
 # Create a 2 dimensional array. A two dimensional
 # array is simply a list of lists.
 # 0 represents a filled cell (wall), 1 represents an emty cell (open)
+#  x -->
+# y
+# |
+# v
 grid = []
-for row in range(ROWS):
+for column in range(COLUMNS):
     # Add an empty array that will hold each cell
-    # in this row
+    # in this column
     grid.append([])
-    for column in range(COLUMNS):
-        grid[row].append(0)  # Append a cell
+    for row in range(ROWS):
+        grid[column].append(0)  # Append a cell
 
 # Initialize pygame
 pygame.init()
@@ -68,14 +72,20 @@ clock = pygame.time.Clock()
 random.seed()
 startPos = [random.randint(11, (COLUMNS-1)/2)*2-9, random.randint(11, (ROWS-1)/2)*2-9]
 stack = [startPos]
-grid[startPos[0]][startPos[1]] = 2
+grid[startPos[0]][startPos[1]] = 3
 currentPos = startPos
 
 # -------- Drawing Maze Program Loop -----------
 while not done:
+    grid[startPos[0]][startPos[1]] = 3
     for event in pygame.event.get():  # User did something
         if event.type == pygame.QUIT:  # If user clicked close
             done = True  # Flag that we are done so we exit this loop
+            continue
+        if event.type == pygame.KEYDOWN :  # If user press SPACE
+            if event.key == pygame.K_SPACE:
+                done = True  # Flag that we are done so we exit this loop
+                continue
         elif event.type == pygame.MOUSEBUTTONDOWN:
             # User clicks the mouse. Get the position
             pos = pygame.mouse.get_pos()
@@ -83,21 +93,27 @@ while not done:
             column = pos[0] // (WIDTH + MARGIN)
             row = pos[1] // (HEIGHT + MARGIN)
             # Set that location to one
-            grid[row][column] = 1
+            grid[column][row] = 1
             print("Click ", pos, "Grid coordinates: ", row, column)
  
     # Set the screen background
     screen.fill(BLACK)
  
     # If current pos is a dead end, go back
-    if currentPos[1] < 3 or currentPos[1] > ROWS - 3 or currentPos[0] < 3 or currentPos[0] > COLUMNS - 3:
+    if (currentPos[1] < 3 or
+        currentPos[1] > ROWS - 3 or
+        currentPos[0] < 3 or
+        currentPos[0] > COLUMNS - 3):
         if len(stack) > 1:
             grid[currentPos[0]][currentPos[1]] = 1
             currentPos = stack.pop()
             grid[currentPos[0]][currentPos[1]] = 2
         else:
             done = True
-    elif grid[currentPos[0]][currentPos[1]-2] == 1 and grid[currentPos[0]][currentPos[1]+2] == 1 and grid[currentPos[0]-2][currentPos[1]] == 1 and grid[currentPos[0]+2][currentPos[1]] == 1:
+    elif (grid[currentPos[0]][currentPos[1]-2] != 0 and
+          grid[currentPos[0]][currentPos[1]+2] != 0 and
+          grid[currentPos[0]-2][currentPos[1]] != 0 and
+          grid[currentPos[0]+2][currentPos[1]] != 0):
         if len(stack) > 1:
             grid[currentPos[0]][currentPos[1]] = 1
             currentPos = stack.pop()
@@ -145,13 +161,15 @@ while not done:
             stack.append(currentPos)
 
     # Draw the grid
-    for row in range(ROWS):
-        for column in range(COLUMNS):
+    for column in range(COLUMNS):
+        for row in range(ROWS):
             color = WHITE
-            if grid[row][column] == 1:
+            if grid[column][row] == 1:
                 color = BLACK
-            elif grid[row][column] == 2:
+            elif grid[column][row] == 2:
                 color = RED
+            elif grid[column][row] == 3:
+                color = GREEN
             pygame.draw.rect(screen,
                              color,
                              [(MARGIN + WIDTH) * column + MARGIN,
@@ -173,6 +191,11 @@ while not done:
     for event in pygame.event.get():  # User did something
         if event.type == pygame.QUIT:  # If user clicked close
             done = True  # Flag that we are done so we exit this loop
+            continue
+        if event.type == pygame.KEYDOWN :  # If user press SPACE
+            if event.key == pygame.K_SPACE:
+                done = True  # Flag that we are done so we exit this loop
+                continue
         elif event.type == pygame.MOUSEBUTTONDOWN:
             # User clicks the mouse. Get the position
             pos = pygame.mouse.get_pos()
@@ -180,20 +203,22 @@ while not done:
             column = pos[0] // (WIDTH + MARGIN)
             row = pos[1] // (HEIGHT + MARGIN)
             # Set that location to one
-            grid[row][column] = 1
+            grid[column][row] = 1
             print("Click ", pos, "Grid coordinates: ", row, column)
  
     # Set the screen background
     screen.fill(BLACK)
 
     # Draw the grid
-    for row in range(ROWS):
-        for column in range(COLUMNS):
+    for column in range(COLUMNS):
+        for row in range(ROWS):
             color = WHITE
-            if grid[row][column] == 1:
+            if grid[column][row] == 1:
                 color = BLACK
-            elif grid[row][column] == 2:
+            elif grid[column][row] == 2:
                 color = RED
+            elif grid[column][row] == 3:
+                color = GREEN
             pygame.draw.rect(screen,
                              color,
                              [(MARGIN + WIDTH) * column + MARGIN,
