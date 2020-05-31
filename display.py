@@ -17,6 +17,7 @@ BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 GREEN = (0, 255, 0)
 RED = (255, 0, 0)
+BLUE = (0, 0, 255)
 
 # open the file in read binary mode
 file = open("maze", "rb")
@@ -80,6 +81,8 @@ while not done:
                 color = RED
             elif grid[column][row] == 3:
                 color = GREEN
+            elif grid[column][row] == 4:
+                color = BLUE
             pygame.draw.rect(screen,
                              color,
                              [(MARGIN + WIDTH) * column + MARGIN,

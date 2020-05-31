@@ -17,6 +17,7 @@ BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 GREEN = (0, 255, 0)
 RED = (255, 0, 0)
+BLUE = (0, 0, 255)
 
 # Define directions
 UP = 0
@@ -27,8 +28,8 @@ DIRECTIONS = ["UP", "DOWN", "LEFT", "RIGHT"]
 
 # This sets the maze dimensions
 # Number of rows and columns has to be odd
-COLUMNS = 21
-ROWS = 21
+COLUMNS = 91
+ROWS = 51
 
 # This sets the margin between each cell
 MARGIN = 1
@@ -76,8 +77,9 @@ startPos = [random.randint(7, (COLUMNS-1)/2)*2-9, random.randint(7, (ROWS-1)/2)*
 stack = [startPos]
 grid[startPos[0]][startPos[1]] = 3
 currentPos = startPos
+endPos = startPos
 
-last_dir = -1
+stackMaxSize = 1
 
 def findDir(pos):
     print("find direction")
@@ -176,6 +178,15 @@ while not done:
         currentPos = [currentPos[0]+2, currentPos[1]]
         stack.append(currentPos)
 
+    # save the position of the most distant point from start
+    if len(stack) > stackMaxSize:
+        stackMaxSize = len(stack)
+        grid[endPos[0]][endPos[1]] = 1
+        endPos = currentPos
+
+    grid[startPos[0]][startPos[1]] = 3
+    grid[endPos[0]][endPos[1]] = 4
+
     # Draw the grid
     for column in range(COLUMNS):
         for row in range(ROWS):
@@ -186,6 +197,8 @@ while not done:
                 color = RED
             elif grid[column][row] == 3:
                 color = GREEN
+            elif grid[column][row] == 4:
+                color = BLUE
             pygame.draw.rect(screen,
                              color,
                              [(MARGIN + WIDTH) * column + MARGIN,
@@ -201,6 +214,7 @@ while not done:
 
 grid[currentPos[0]][currentPos[1]] = 1
 grid[startPos[0]][startPos[1]] = 3
+grid[endPos[0]][endPos[1]] = 4
 
 #initialize an array
 arr = np.array(grid)
