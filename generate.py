@@ -23,6 +23,7 @@ UP = 0
 DOWN = 1
 LEFT = 2
 RIGHT = 3
+DIRECTIONS = ["UP", "DOWN", "LEFT", "RIGHT"]
 
 # This sets the maze dimensions
 # Number of rows and columns has to be odd
@@ -78,9 +79,45 @@ currentPos = startPos
 
 last_dir = -1
 
+def findDir(pos):
+    print("find direction")
+    result = -1
+    directions = [UP, DOWN, LEFT, RIGHT]
+    while len(directions) != 0 and result == -1:
+        rnd = random.randint(0, len(directions) - 1)
+        dir = directions[rnd]
+        if dir == UP:
+            if pos[1] == 1:
+                directions.remove(UP)
+            elif grid[pos[0]][pos[1]-2] != 0:
+                directions.remove(UP)
+            else:
+                result = dir
+        elif dir == DOWN:
+            if pos[1] == ROWS - 2:
+                directions.remove(DOWN)
+            elif grid[pos[0]][pos[1]+2] != 0:
+                directions.remove(DOWN)
+            else:
+                result = dir
+        elif dir == LEFT:
+            if pos[0] == 1:
+                directions.remove(LEFT)
+            elif grid[pos[0]-2][pos[1]] != 0:
+                directions.remove(LEFT)
+            else:
+                result = dir
+        elif dir == RIGHT:
+            if pos[0] == COLUMNS - 2:
+                directions.remove(RIGHT)
+            elif grid[pos[0]+2][pos[1]] != 0:
+                directions.remove(RIGHT)
+            else:
+                result = dir
+    return result
+
 # -------- Drawing Maze Program Loop -----------
 while not done:
-    grid[startPos[0]][startPos[1]] = 3
     for event in pygame.event.get():  # User did something
         if event.type == pygame.QUIT:  # If user clicked close
             done = True  # Flag that we are done so we exit this loop
@@ -89,111 +126,55 @@ while not done:
             if event.key == pygame.K_SPACE:
                 done = True  # Flag that we are done so we exit this loop
                 continue
-        elif event.type == pygame.MOUSEBUTTONDOWN:
-            # User clicks the mouse. Get the position
-            pos = pygame.mouse.get_pos()
-            # Change the x/y screen coordinates to grid coordinates
-            column = pos[0] // (WIDTH + MARGIN)
-            row = pos[1] // (HEIGHT + MARGIN)
-            # Set that location to one
-            grid[column][row] = 1
-            print("Click ", pos, "Grid coordinates: ", row, column)
- 
+
     # Set the screen background
     screen.fill(BLACK)
     
     print("current pos " + str(currentPos[0]) + ":"  + str(currentPos[1]))
 
     # Pick a random direction
-    dir = random.randint(0, 3)
-    print("Dir: " + str(dir))
-    if last_dir != DOWN and dir == UP:
-        if currentPos[1] >= 3 and grid[currentPos[0]][currentPos[1]-2] == 0:
-            print("Move UP")
+    dir = findDir(currentPos)
+    if dir == -1: # no possible direction, this is a dead end
+        if len(stack) > 1:
+            print("Dead End, go back !")
             grid[currentPos[0]][currentPos[1]] = 1
-            grid[currentPos[0]][currentPos[1]-1] = 1
-            grid[currentPos[0]][currentPos[1]-2] = 2
-            currentPos = [currentPos[0], currentPos[1]-2]
-            stack.append(currentPos)
-            last_dir = dir
-        elif (
-            grid[currentPos[0]-2][currentPos[1]] != 0  and
-            grid[currentPos[0]+2][currentPos[1]] != 0
-        ):
-            if len(stack) > 1:
-                print("! DEAD END, GO BACK !")
-                grid[currentPos[0]][currentPos[1]] = 1
-                currentPos = stack.pop()
-                grid[currentPos[0]][currentPos[1]] = 2
-            else:
-                print("!! Stack is empty !!")
-                done = True
+            currentPos = stack.pop() # returns the last element and remove it from list
+            grid[currentPos[0]][currentPos[1]] = 2
+        else:
+            print("Stack is empty, exit !")
+            done = True
 
-    elif last_dir != UP and dir == DOWN:
-        if currentPos[1] <= ROWS - 3 and grid[currentPos[0]][currentPos[1]+2] == 0:
-            print("Move DOWN")
-            grid[currentPos[0]][currentPos[1]] = 1
-            grid[currentPos[0]][currentPos[1]+1] = 1
-            grid[currentPos[0]][currentPos[1]+2] = 2
-            currentPos = [currentPos[0], currentPos[1]+2]
-            stack.append(currentPos)
-            last_dir = dir
-        elif (
-            grid[currentPos[0]-2][currentPos[1]] != 0  and
-            grid[currentPos[0]+2][currentPos[1]] != 0
-        ):
-            if len(stack) > 1:
-                print("! DEAD END, GO BACK !")
-                grid[currentPos[0]][currentPos[1]] = 1
-                currentPos = stack.pop()
-                grid[currentPos[0]][currentPos[1]] = 2
-            else:
-                print("!! Stack is empty !!")
-                done = True
+    elif dir == UP:
+        print("Move UP")
+        grid[currentPos[0]][currentPos[1]] = 1
+        grid[currentPos[0]][currentPos[1]-1] = 1
+        grid[currentPos[0]][currentPos[1]-2] = 2
+        currentPos = [currentPos[0], currentPos[1]-2]
+        stack.append(currentPos)
 
-    elif last_dir != RIGHT and dir == LEFT:
-        if currentPos[0] >= 3 and grid[currentPos[0]-2][currentPos[1]] == 0:
-            print("Move LEFT")
-            grid[currentPos[0]][currentPos[1]] = 1
-            grid[currentPos[0]-1][currentPos[1]] = 1
-            grid[currentPos[0]-2][currentPos[1]] = 2
-            currentPos = [currentPos[0]-2, currentPos[1]]
-            stack.append(currentPos)
-            last_dir = dir
-        elif (
-            grid[currentPos[0]][currentPos[1]-2] != 0  and
-            grid[currentPos[0]][currentPos[1]+2] != 0
-        ):
-            if len(stack) > 1:
-                print("! DEAD END, GO BACK !")
-                grid[currentPos[0]][currentPos[1]] = 1
-                currentPos = stack.pop()
-                grid[currentPos[0]][currentPos[1]] = 2
-            else:
-                print("!! Stack is empty !!")
-                done = True
+    elif dir == DOWN:
+        print("Move DOWN")
+        grid[currentPos[0]][currentPos[1]] = 1
+        grid[currentPos[0]][currentPos[1]+1] = 1
+        grid[currentPos[0]][currentPos[1]+2] = 2
+        currentPos = [currentPos[0], currentPos[1]+2]
+        stack.append(currentPos)
 
-    elif last_dir != LEFT and dir == RIGHT:
-        if currentPos[0] <= COLUMNS - 3 and grid[currentPos[0]+2][currentPos[1]] == 0:
-            print("Move RIGHT")
-            grid[currentPos[0]][currentPos[1]] = 1
-            grid[currentPos[0]+1][currentPos[1]] = 1
-            grid[currentPos[0]+2][currentPos[1]] = 2
-            currentPos = [currentPos[0]+2, currentPos[1]]
-            stack.append(currentPos)
-            last_dir = dir
-        elif (
-            grid[currentPos[0]][currentPos[1]-2] != 0  and
-            grid[currentPos[0]][currentPos[1]+2] != 0
-        ):
-            if len(stack) > 1:
-                print("! DEAD END, GO BACK !")
-                grid[currentPos[0]][currentPos[1]] = 1
-                currentPos = stack.pop()
-                grid[currentPos[0]][currentPos[1]] = 2
-            else:
-                print("!! Stack is empty !!")
-                done = True
+    elif dir == LEFT:
+        print("Move LEFT")
+        grid[currentPos[0]][currentPos[1]] = 1
+        grid[currentPos[0]-1][currentPos[1]] = 1
+        grid[currentPos[0]-2][currentPos[1]] = 2
+        currentPos = [currentPos[0]-2, currentPos[1]]
+        stack.append(currentPos)
+
+    elif dir == RIGHT:
+        print("Move RIGHT")
+        grid[currentPos[0]][currentPos[1]] = 1
+        grid[currentPos[0]+1][currentPos[1]] = 1
+        grid[currentPos[0]+2][currentPos[1]] = 2
+        currentPos = [currentPos[0]+2, currentPos[1]]
+        stack.append(currentPos)
 
     # Draw the grid
     for column in range(COLUMNS):
@@ -219,6 +200,7 @@ while not done:
     pygame.display.flip()
 
 grid[currentPos[0]][currentPos[1]] = 1
+grid[startPos[0]][startPos[1]] = 3
 
 #initialize an array
 arr = np.array(grid)
