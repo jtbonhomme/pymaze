@@ -9,39 +9,50 @@
  Explanation video: http://youtu.be/mdTeqiWyFnc
 """
 import pygame
- 
+import random
+
 # Define some colors
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 GREEN = (0, 255, 0)
 RED = (255, 0, 0)
- 
-# This sets the WIDTH and HEIGHT of each grid location
-WIDTH = 20
-HEIGHT = 20
- 
+
+# Define directions
+UP = 0
+DOWN = 1
+LEFT = 2
+RIGHT = 3
+
+# This sets the maze dimensions
+# Number of rows and columns has to be odd
+COLUMNS = 81
+ROWS = 81
+
 # This sets the margin between each cell
-MARGIN = 5
- 
+MARGIN = 1
+
+# This sets the WIDTH and HEIGHT of each grid location
+WIDTH = 7
+HEIGHT = 7
+
+# Set the HEIGHT and WIDTH of the screen
+WINDOW_SIZE = [(WIDTH+MARGIN)*COLUMNS, (HEIGHT+MARGIN)*ROWS]
+
 # Create a 2 dimensional array. A two dimensional
 # array is simply a list of lists.
+# 0 represents a filled cell (wall), 1 represents an emty cell (open)
 grid = []
-for row in range(10):
+for row in range(ROWS):
     # Add an empty array that will hold each cell
     # in this row
     grid.append([])
-    for column in range(10):
+    for column in range(COLUMNS):
         grid[row].append(0)  # Append a cell
- 
-# Set row 1, cell 5 to one. (Remember rows and
-# column numbers start at zero.)
-grid[1][5] = 1
- 
+
 # Initialize pygame
 pygame.init()
  
-# Set the HEIGHT and WIDTH of the screen
-WINDOW_SIZE = [255, 255]
+# Initialize screen
 screen = pygame.display.set_mode(WINDOW_SIZE)
  
 # Set title of screen
@@ -52,8 +63,15 @@ done = False
  
 # Used to manage how fast the screen updates
 clock = pygame.time.Clock()
- 
-# -------- Main Program Loop -----------
+
+# Define starting position and push it in stack
+random.seed()
+startPos = [random.randint(11, (COLUMNS-1)/2)*2-9, random.randint(11, (ROWS-1)/2)*2-9]
+stack = [startPos]
+grid[startPos[0]][startPos[1]] = 2
+currentPos = startPos
+
+# -------- Drawing Maze Program Loop -----------
 while not done:
     for event in pygame.event.get():  # User did something
         if event.type == pygame.QUIT:  # If user clicked close
@@ -71,12 +89,54 @@ while not done:
     # Set the screen background
     screen.fill(BLACK)
  
+    # If current pos is a dead end, go back
+    if (grid[currentPos[0]][currentPos[1]-2] == 1 or currentPos[1] < 3) and (grid[currentPos[0]][currentPos[1]+2] == 1 or currentPos[1] > ROWS - 3) and (grid[currentPos[0]-2][currentPos[1]] == 1 or currentPos[0] < 3) and (grid[currentPos[0]+2][currentPos[1]] == 1 or currentPos[0] > COLUMNS - 3):
+        grid[currentPos[0]][currentPos[1]] = 1
+        currentPos = stack.pop()
+        grid[currentPos[0]][currentPos[1]] = 2
+
+    # Pick a random direction
+    dir = random.randint(0, 3)
+    if dir == UP:
+        if currentPos[1] >= 3 and grid[currentPos[0]][currentPos[1]-2] != 1:
+            grid[currentPos[0]][currentPos[1]] = 1
+            grid[currentPos[0]][currentPos[1]-1] = 1
+            grid[currentPos[0]][currentPos[1]-2] = 2
+            currentPos = [currentPos[0], currentPos[1]-2]
+            stack.append(currentPos)
+
+    elif dir == DOWN:
+        if currentPos[1] <= ROWS - 3 and grid[currentPos[0]][currentPos[1]+2] != 1:
+            grid[currentPos[0]][currentPos[1]] = 1
+            grid[currentPos[0]][currentPos[1]+1] = 1
+            grid[currentPos[0]][currentPos[1]+2] = 2
+            currentPos = [currentPos[0], currentPos[1]+2]
+            stack.append(currentPos)
+
+    elif dir == LEFT:
+        if currentPos[0] >= 3 and grid[currentPos[0]-2][currentPos[1]] != 1:
+            grid[currentPos[0]][currentPos[1]] = 1
+            grid[currentPos[0]-1][currentPos[1]] = 1
+            grid[currentPos[0]-2][currentPos[1]] = 2
+            currentPos = [currentPos[0]-2, currentPos[1]]
+            stack.append(currentPos)
+
+    elif dir == RIGHT:
+        if currentPos[0] <= COLUMNS - 3 and grid[currentPos[0]+2][currentPos[1]] != 1:
+            grid[currentPos[0]][currentPos[1]] = 1
+            grid[currentPos[0]+1][currentPos[1]] = 1
+            grid[currentPos[0]+2][currentPos[1]] = 2
+            currentPos = [currentPos[0]+2, currentPos[1]]
+            stack.append(currentPos)
+
     # Draw the grid
-    for row in range(10):
-        for column in range(10):
+    for row in range(ROWS):
+        for column in range(COLUMNS):
             color = WHITE
             if grid[row][column] == 1:
-                color = GREEN
+                color = BLACK
+            elif grid[row][column] == 2:
+                color = RED
             pygame.draw.rect(screen,
                              color,
                              [(MARGIN + WIDTH) * column + MARGIN,
@@ -89,7 +149,7 @@ while not done:
  
     # Go ahead and update the screen with what we've drawn.
     pygame.display.flip()
- 
+
 # Be IDLE friendly. If you forget this line, the program will 'hang'
 # on exit.
 pygame.quit()
