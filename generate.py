@@ -28,15 +28,15 @@ DIRECTIONS = ["UP", "DOWN", "LEFT", "RIGHT"]
 
 # This sets the maze dimensions
 # Number of rows and columns has to be odd
-COLUMNS = 91
+COLUMNS = 51
 ROWS = 51
+
+# The total width of the window should not exceed 720 px
+WIDTH = round(720/COLUMNS)-1
+HEIGHT = round(720/COLUMNS)-1
 
 # This sets the margin between each cell
 MARGIN = 1
-
-# This sets the WIDTH and HEIGHT of each grid location
-WIDTH = 7
-HEIGHT = 7
 
 # Set the HEIGHT and WIDTH of the screen
 WINDOW_SIZE = [(WIDTH+MARGIN)*COLUMNS, (HEIGHT+MARGIN)*ROWS]
@@ -73,7 +73,7 @@ clock = pygame.time.Clock()
 
 # Define starting position and push it in stack
 random.seed()
-startPos = [random.randint(7, (COLUMNS-1)/2)*2-9, random.randint(7, (ROWS-1)/2)*2-9]
+startPos = [random.randint(3, (COLUMNS-1)/2)*2-3, random.randint(3, (ROWS-1)/2)*2-3]
 stack = [startPos]
 grid[startPos[0]][startPos[1]] = 3
 currentPos = startPos
@@ -124,10 +124,19 @@ while not done:
         if event.type == pygame.QUIT:  # If user clicked close
             done = True  # Flag that we are done so we exit this loop
             continue
-        if event.type == pygame.KEYDOWN :  # If user press SPACE
+        elif event.type == pygame.KEYDOWN :  # If user press SPACE
             if event.key == pygame.K_SPACE:
                 done = True  # Flag that we are done so we exit this loop
                 continue
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            # User clicks the mouse. Get the position
+            pos = pygame.mouse.get_pos()
+            # Change the x/y screen coordinates to grid coordinates
+            column = pos[0] // (WIDTH + MARGIN)
+            row = pos[1] // (HEIGHT + MARGIN)
+            # Set that location to one
+            grid[column][row] = 1
+            print("Click ", pos, "Grid coordinates: ", column, row)
 
     # Set the screen background
     screen.fill(BLACK)
@@ -144,7 +153,7 @@ while not done:
             grid[currentPos[0]][currentPos[1]] = 2
         else:
             print("Stack is empty, exit !")
-            done = True
+            #done = True
 
     elif dir == UP:
         print("Move UP")

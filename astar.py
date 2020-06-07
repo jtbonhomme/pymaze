@@ -20,13 +20,6 @@ GREEN = (0, 255, 0)
 RED = (255, 0, 0)
 BLUE = (0, 0, 255)
 
-# This sets the margin between each cell
-MARGIN = 1
-
-# This sets the WIDTH and HEIGHT of each grid location
-WIDTH = 7
-HEIGHT = 7
-
 class Cell(object):
     def __init__(self, x, y):
         """
@@ -119,13 +112,16 @@ def insert_sorted_cost(list, cell):
     display_list(list, "resulting list : ")
     return list
 
-def build_path(position, start, list):
-
+def build_path(position, startPos, grid):
+    """
+    Reconstruct shortest path from start to goal node
+    """
     path = []
-    path.insert(0, position)
-    while len(list) > 0 and position.x != start.x and position.y != start.y:
-        position = list.pop()
-        path.insert(0, position)
+    currentPos = position
+    while currentPos.parent != None:
+        path.insert(0, currentPos)
+        grid[currentPos.x][currentPos.y] = 4
+        currentPos = currentPos.parent
 
     return path
 
@@ -161,6 +157,11 @@ def display_list(list, title = ""):
         print(" [%d, %d] (%d/%d)" % (v.x, v.y, v.cost, v.distance), end = '')
     print("")
 
+def display_path(list, grid):
+    for v in list:
+        grid[v.x][v.y] = 3
+    draw_grid(grid)
+
 def is_in_list(cell, list):
     for v in list:
         if v.x == cell.x and v.y == cell.y:
@@ -171,6 +172,7 @@ def searchPath(startPos, endPos, grid):
     # yet_to_visit_list is a descendant ordered list of cells (highest cost first, lowest cost last)
     yet_to_visit_list = [startPos]
     visited_list = []
+    path = []
 
     # Loop until the user clicks the close button.
     done = False
@@ -204,6 +206,7 @@ def searchPath(startPos, endPos, grid):
 
         # stop the loop if reached the end position
         if currentCell.x == endPos.x and currentCell.y == endPos.y:
+            path = build_path(currentCell, startPos, grid)
             break
 
         cells = get_neighbours(currentCell, grid)
@@ -218,17 +221,16 @@ def searchPath(startPos, endPos, grid):
             v.heuristic = get_heuristic_euclidian(v)
             v.cost = v.heuristic + v.distance
             insert_sorted_cost(yet_to_visit_list, v)
+            grid[v.x][v.y] = 3
             #visited_list.append(v)
 
         display_list(yet_to_visit_list, "open list: ")
-        #display_list(visited_list, "closed list: ")
+
         # Limit to 60 frames per second
         clock.tick(60)
     
         # Go ahead and update the screen with what we've drawn.
         pygame.display.flip()
-
-    path = build_path(currentCell, startPos, visited_list)
 
     return path, iterations
 
@@ -246,12 +248,21 @@ if __name__ == '__main__':
     COLUMNS = len(grid)
     ROWS = len(grid[0])
 
+    # This sets the margin between each cell
+    MARGIN = 1
+
+    # This sets the WIDTH and HEIGHT of each grid location
+    # The total width of the window should not exceed 720 px
+    WIDTH = round(720/COLUMNS)-1
+    HEIGHT = round(720/COLUMNS)-1
+
     # Set the HEIGHT and WIDTH of the screen
     WINDOW_SIZE = [(WIDTH+MARGIN)*COLUMNS, (HEIGHT+MARGIN)*ROWS]
 
     # Initialize pygame
     pygame.init()
-    
+    font = pygame.font.SysFont("consolas", WIDTH-1)
+
     # Initialize screen
     screen = pygame.display.set_mode(WINDOW_SIZE)
     
@@ -275,10 +286,12 @@ if __name__ == '__main__':
     print("Going to " + str(endPos.x) + ":" + str(endPos.y))
 
     path, iterations = searchPath(startPos, endPos, grid)
-    display_list(path, "resulting path")
-    print("in %d itertations" % (iterations))
-    # Loop until the user clicks the close button.
-    done = False
+    draw_grid(grid)
+
+    # Go ahead and update the screen with what we've drawn.
+    pygame.display.flip()
+
+    print("Resolved maze in %d iterations" % (iterations))
 
     # -------- Wait user event -----------
     wait()

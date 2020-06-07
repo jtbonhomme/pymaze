@@ -32,12 +32,13 @@ file.close
 COLUMNS = len(grid)
 ROWS = len(grid[0])
 
+# This sets the WIDTH and HEIGHT of each grid location
+# The total width of the window should not exceed 720 px
+WIDTH = round(720/COLUMNS)-1
+HEIGHT = round(720/COLUMNS)-1
+
 # This sets the margin between each cell
 MARGIN = 1
-
-# This sets the WIDTH and HEIGHT of each grid location
-WIDTH = 7
-HEIGHT = 7
 
 # Set the HEIGHT and WIDTH of the screen
 WINDOW_SIZE = [(WIDTH+MARGIN)*COLUMNS, (HEIGHT+MARGIN)*ROWS]
