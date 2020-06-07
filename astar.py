@@ -202,6 +202,10 @@ def searchPath(startPos, endPos, grid):
         # move lowest cost cell from open list to closed list
         visited_list.append(currentCell)
         grid[currentCell.x][currentCell.y] = 2
+        text = font.render(str(currentCell.distance), True, (0, 0, 0))
+        screen.blit(text,
+            (currentCell.x * (WIDTH + MARGIN), currentCell.y * (HEIGHT + MARGIN)))
+    
         iterations += 1
 
         # stop the loop if reached the end position
@@ -261,7 +265,7 @@ if __name__ == '__main__':
 
     # Initialize pygame
     pygame.init()
-    font = pygame.font.SysFont("consolas", WIDTH-1)
+    font = pygame.font.SysFont("consolas", round((WIDTH - MARGIN)/1.5))
 
     # Initialize screen
     screen = pygame.display.set_mode(WINDOW_SIZE)
