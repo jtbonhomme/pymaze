@@ -203,8 +203,8 @@ def searchPath(startPos, endPos, grid):
 
         cells = get_neighbours(currentCell, grid)
         for v in cells:
-            #if is_in_list(v, visited_list) or is_in_list(v, yet_to_visit_list):
-            if is_in_list(v, visited_list):
+            if is_in_list(v, visited_list) or is_in_list(v, yet_to_visit_list):
+            #if is_in_list(v, visited_list):
                 print(" --> [%d, %d] has already been visited" % (v.x, v.y))
                 continue
 
