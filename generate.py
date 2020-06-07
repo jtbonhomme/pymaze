@@ -54,7 +54,7 @@ for column in range(COLUMNS):
     # in this column
     grid.append([])
     for row in range(ROWS):
-        grid[column].append(0)  # Append a cell
+        grid[column].append(0)  # Append a cell, default value is 0 (wall)
 
 # Initialize pygame
 pygame.init()
