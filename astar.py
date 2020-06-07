@@ -104,12 +104,17 @@ def insert_sorted_cost(list, cell):
     display_list(list, "insert [%d, %d] (%d) in initial list : " % (cell.x, cell.y, cell.cost))
 
     if len(list) > 0:
+        print("initial list is not empty")
         for i in range (0, len(list), 1):
+            print("compare cell with position %d: [%d, %d] (%d)"%(i, list[i].x, list[i].y, list[i].cost))
             if cell.cost > list[i].cost:
+                print("cell cost is higher, insert it at position %d"%(i))
                 list.insert(i, cell)
                 display_list(list, "resulting list : ")
                 return list
-    
+    else:
+        print("original list is empty")
+    print("append cell to the end")
     list.append(cell)
     display_list(list, "resulting list : ")
     return list
